@@ -9,7 +9,9 @@ import com.example.TrelloClone.Models.Task.AddUser;
 import com.example.TrelloClone.Models.Task.ModifyTask;
 import com.example.TrelloClone.Models.Task.TaskResponse;
 import com.example.TrelloClone.Service.TaskServiceInterface;
+import com.example.TrelloClone.Service.NoUndoHistoryException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,6 +61,11 @@ public class TaskController {
     @PutMapping("/undo")
     public ResponseEntity<TaskResponse> undoTask(@RequestParam long taskID) {
         return ResponseEntity.ok().body(taskServiceInterface.undo(taskID));
+    }
+
+    @ExceptionHandler(NoUndoHistoryException.class)
+    public ResponseEntity<String> handleNoUndoHistory(NoUndoHistoryException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getMessage());
     }
 
     @GetMapping("/getComments")
