@@ -22,13 +22,11 @@ public class TaskServiceImplementation implements TaskServiceInterface {
     private final TaskUsersRepository taskUsersRepository;
     private final HistoryRepository historyRepository;
     private final UserRepository userRepository;
-    LocalDateTime dateTime = LocalDateTime.now();
-    DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
-    String  formattedDate = dateTime.format(dateTimeFormat);
-    History history;
+    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 
     @Override
     public TaskResponse saveTask(Task task) {
+        String formattedDate = currentTimestamp();
         task.setCreationTime(formattedDate);
         task.setStatus(TaskStatus.TODO);
         task.setEstimatedTime("1 Week");
@@ -66,6 +64,7 @@ public class TaskServiceImplementation implements TaskServiceInterface {
 
     @Override
     public TaskResponse addComment(AddComment addComment) {
+        String formattedDate = currentTimestamp();
         Comment comment = new Comment();
         TaskResponse taskResponse = new TaskResponse();
         comment.setComment(addComment.getComment());
@@ -85,6 +84,7 @@ public class TaskServiceImplementation implements TaskServiceInterface {
 
     @Override
     public TaskResponse addUsers(AddUser addUser) {
+        String formattedDate = currentTimestamp();
         TaskResponse taskResponse = new TaskResponse();
         Task task = taskRepository.findByTaskID(addUser.getTaskID());
         UserDetails userDetails = userRepository.findByUserID(addUser.getUserID());
@@ -113,6 +113,7 @@ public class TaskServiceImplementation implements TaskServiceInterface {
 
     @Override
     public TaskResponse modifyTask(ModifyTask modifyTask) {
+        String formattedDate = currentTimestamp();
         TaskResponse taskResponse = new TaskResponse();
         Task taskFromRepo = taskRepository.findByTaskID(modifyTask.getTaskID());
 
@@ -204,11 +205,15 @@ public class TaskServiceImplementation implements TaskServiceInterface {
     @Override
     public TaskResponse undo(long taskID) {
         List <History> taskFromHistory = historyRepository.findByTaskID(taskID);
+        History history = null;
         for (int x = taskFromHistory.size() -1; x>=0; x--){
             if(!taskFromHistory.get(x).isUndone()){
                 history = taskFromHistory.get(x);
                 break;
             }
+        }
+        if (history == null) {
+            throw new IllegalStateException("No unapplied history found for taskId: " + taskID);
         }
 
         TaskResponse taskResponse = new TaskResponse();
@@ -244,7 +249,7 @@ public class TaskServiceImplementation implements TaskServiceInterface {
                 }
             }
         }
-        undoTask.setUpdateTime(formattedDate);
+        undoTask.setUpdateTime(currentTimestamp());
         taskRepository.save(undoTask);
         taskResponse.setTask(undoTask);
         history.setUndone(true);
@@ -270,6 +275,14 @@ public class TaskServiceImplementation implements TaskServiceInterface {
         }
 
         return userTasks;
+    }
+
+    private String currentTimestamp() {
+        return currentTime().format(DATE_TIME_FORMAT);
+    }
+
+    LocalDateTime currentTime() {
+        return LocalDateTime.now();
     }
 
 }
