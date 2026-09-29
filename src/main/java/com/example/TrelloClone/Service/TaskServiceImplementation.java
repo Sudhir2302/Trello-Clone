@@ -22,7 +22,7 @@ public class TaskServiceImplementation implements TaskServiceInterface {
     private final TaskUsersRepository taskUsersRepository;
     private final HistoryRepository historyRepository;
     private final UserRepository userRepository;
-    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
 
     @Override
     public TaskResponse saveTask(Task task) {
@@ -213,7 +213,7 @@ public class TaskServiceImplementation implements TaskServiceInterface {
             }
         }
         if (history == null) {
-            throw new IllegalStateException("No unapplied history found for taskId: " + taskID);
+            throw new NoUndoHistoryException(taskID);
         }
 
         TaskResponse taskResponse = new TaskResponse();
