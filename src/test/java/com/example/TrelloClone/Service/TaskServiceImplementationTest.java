@@ -66,6 +66,7 @@ class TaskServiceImplementationTest {
 
         assertThat(firstTask.getCreationTime()).isEqualTo("01-01-2026 10:00");
         assertThat(secondTask.getCreationTime()).isEqualTo("01-01-2026 10:01");
+        verify(taskRepository, times(2)).save(any(Task.class));
     }
 
     @Test

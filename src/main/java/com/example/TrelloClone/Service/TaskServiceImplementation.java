@@ -34,7 +34,6 @@ public class TaskServiceImplementation implements TaskServiceInterface {
         taskResponse.setTask(taskRepository.save(task));
         taskResponse.setUserDetails(taskUsersRepository.findByTask(task).stream().map(TaskUsers::getUserDetails).collect(Collectors.toList()));
         taskResponse.setComments(commentRepository.findByTask(task).stream().map(Comment::getComment).collect(Collectors.toList()));
-        taskRepository.save(task);
         return taskResponse;
     }
 
